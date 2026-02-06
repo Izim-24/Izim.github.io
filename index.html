@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Sinh Viên</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6c757d;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --bg-body: #f4f7f6;
+            --text-dark: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Khung cho từng phần (Card style) */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        /* Form Layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-add { background-color: var(--success-color); color: white; }
+        .btn-update { background-color: var(--primary-color); color: white; display: none; }
+        .btn-cancel { background-color: var(--secondary-color); color: white; display: none; }
+        
+        button:hover {
+            filter: brightness(0.9);
+            transform: translateY(-2px);
+        }
+
+        /* Table Design */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+            font-weight: 600;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #fcfcfc; }
+
+        .gpa-badge {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit { background-color: var(--warning-color); color: #333; padding: 6px 12px; }
+        .btn-delete { background-color: var(--danger-color); color: white; padding: 6px 12px; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2> Quản Lý Sinh Viên Viện Công Nghệ</h2>
+
+    <!-- Section: Nhập thông tin -->
+    <div class="card">
+        <div class="card-title"> Nhập thông tin sinh viên</div>
+        <div id="student-form">
+            <input type="hidden" id="edit-index">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Mã Sinh viên</label>
+                    <input type="text" id="maSV" placeholder="Nhập mã SV...">
+                </div>
+                <div class="form-group">
+                    <label>Họ và Tên</label>
+                    <input type="text" id="hoTen" placeholder="Nhập họ tên...">
+                </div>
+                <div class="form-group">
+                    <label>Ngày sinh</label>
+                    <input type="date" id="ngaySinh">
+                </div>
+                <div class="form-group">
+                    <label>Lớp học</label>
+                    <input type="text" id="lopHoc" placeholder="Nhập lớp học...">
+                </div>
+                <div class="form-group full-width">
+                    <label>Điểm GPA</label>
+                    <input type="number" id="gpa" step="0.1" min="0" max="4" placeholder="Thang điểm 4.0">
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="cancel-btn" class="btn-cancel" onclick="resetForm()">Hủy bỏ</button>
+                <button id="update-btn" class="btn-update" onclick="handleUpdateStudent()">Lưu cập nhật</button>
+                <button id="add-btn" class="btn-add" onclick="handleAddStudent()">+ Thêm sinh viên</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Danh sách -->
+    <div class="card" style="border-top-color: var(--success-color);">
+        <div class="card-title" style="color: var(--success-color);"> Danh sách sinh viên</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ và Tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Lớp</th>
+                        <th>GPA</th>
+                        <th style="text-align: center;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list">
+                    <!-- Dữ liệu -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Định nghĩa Class SinhVien
+    class SinhVien {
+        constructor(maSV, hoTen, ngaySinh, lopHoc, gpa) {
+            this.maSV = maSV;
+            this.hoTen = hoTen;
+            this.ngaySinh = ngaySinh;
+            this.lopHoc = lopHoc;
+            this.gpa = parseFloat(gpa);
+        }
+
+        // Phương thức cập nhật (Theo yêu cầu đề bài)
+        updateDetails(hoTen, ngaySinh, lopHoc, gpa) {
+            this.hoTen = hoTen;
+            this.ngaySinh = ngaySinh;
+            this.lopHoc = lopHoc;
+            this.gpa = parseFloat(gpa);
+        }
+    }
+
+    let students = [];
+    let editIndex = -1;
+
+    // Elements
+    const inputMaSV = document.getElementById('maSV');
+    const inputHoTen = document.getElementById('hoTen');
+    const inputNgaySinh = document.getElementById('ngaySinh');
+    const inputLopHoc = document.getElementById('lopHoc');
+    const inputGPA = document.getElementById('gpa');
+    
+    const addBtn = document.getElementById('add-btn');
+    const updateBtn = document.getElementById('update-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    // Xử lý Thêm
+    function handleAddStudent() {
+        const maSV = inputMaSV.value.trim();
+        const hoTen = inputHoTen.value.trim();
+        const ngaySinh = inputNgaySinh.value;
+        const lopHoc = inputLopHoc.value.trim();
+        const gpa = inputGPA.value;
+
+        if (!maSV || !hoTen || !ngaySinh || !lopHoc || !gpa) {
+            alert("Vui lòng điền đủ thông tin!");
+            return;
+        }
+
+        if (students.some(s => s.maSV === maSV)) {
+            alert("Mã sinh viên này đã tồn tại!");
+            return;
+        }
+
+        const newStudent = new SinhVien(maSV, hoTen, ngaySinh, lopHoc, gpa);
+        students.push(newStudent);
+        
+        renderTable();
+        resetForm();
+    }
+
+    // Render bảng
+    function renderTable() {
+        const tbody = document.getElementById('student-list');
+        tbody.innerHTML = students.length === 0 
+            ? '<tr><td colspan="6" style="text-align:center; color:#999;">Chưa có dữ liệu sinh viên</td></tr>' 
+            : '';
+
+        students.forEach((sv, index) => {
+            const row = `
+                <tr>
+                    <td><strong>${sv.maSV}</strong></td>
+                    <td>${sv.hoTen}</td>
+                    <td>${formatDate(sv.ngaySinh)}</td>
+                    <td>${sv.lopHoc}</td>
+                    <td><span class="gpa-badge">${sv.gpa.toFixed(2)}</span></td>
+                    <td class="actions">
+                        <button class="btn-edit" onclick="prepareEdit(${index})">Sửa</button>
+                        <button class="btn-delete" onclick="deleteStudent(${index})">Xóa</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Chuẩn bị sửa
+    function prepareEdit(index) {
+        editIndex = index;
+        const sv = students[index];
+
+        inputMaSV.value = sv.maSV;
+        inputMaSV.disabled = true;
+        inputHoTen.value = sv.hoTen;
+        inputNgaySinh.value = sv.ngaySinh;
+        inputLopHoc.value = sv.lopHoc;
+        inputGPA.value = sv.gpa;
+
+        addBtn.style.display = 'none';
+        updateBtn.style.display = 'inline-block';
+        cancelBtn.style.display = 'inline-block';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Cập nhật
+    function handleUpdateStudent() {
+        const hoTen = inputHoTen.value.trim();
+        const ngaySinh = inputNgaySinh.value;
+        const lopHoc = inputLopHoc.value.trim();
+        const gpa = inputGPA.value;
+
+        if (!hoTen || !ngaySinh || !lopHoc || !gpa) {
+            alert("Không được để trống!");
+            return;
+        }
+
+        // Sử dụng phương thức của class SinhVien
+        students[editIndex].updateDetails(hoTen, ngaySinh, lopHoc, gpa);
+
+        renderTable();
+        resetForm();
+    }
+
+    function deleteStudent(index) {
+        if (confirm("Xác nhận xóa sinh viên này?")) {
+            students.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    function resetForm() {
+        editIndex = -1;
+        inputMaSV.value = '';
+        inputMaSV.disabled = false;
+        inputHoTen.value = '';
+        inputNgaySinh.value = '';
+        inputLopHoc.value = '';
+        inputGPA.value = '';
+
+        addBtn.style.display = 'inline-block';
+        updateBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    // Khởi tạo bảng trống
+    renderTable();
+</script>
+
+</body>
+</html>
